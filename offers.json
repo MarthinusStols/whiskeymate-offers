@@ -1,0 +1,19 @@
+[
+  {
+    "title": "Lagavulin 16",
+    "store": "The Whisky Exchange",
+    "price": 79.99,
+    "oldPrice": 95.0,
+    "imageURL": "https://example.com/lagavulin.jpg",
+    "url": "https://shop.com/lagavulin16"
+  },
+  {
+    "title": "Ardbeg Uigeadail",
+    "store": "Master of Malt",
+    "price": 64.90,
+    "oldPrice": null,
+    "imageURL": "https://example.com/uigeadail.jpg",
+    "url": "https://shop.com/uigeadail"
+  }
+]
+
