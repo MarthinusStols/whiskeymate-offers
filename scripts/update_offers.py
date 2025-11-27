@@ -2,6 +2,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -19,13 +20,11 @@ HEADERS = {
 
 def parse_price(text: str):
     """
-    Convert a price string like '€34,95' or '34,95' to float 34.95
+    Convert a price string like '€ 40,60' or '40,60' to float 40.60
     """
     if not text:
         return None
-    # remove euro sign and spaces
     cleaned = text.replace("€", "").replace("\xa0", "").strip()
-    # turn 34,95 into 34.95
     cleaned = cleaned.replace(".", "").replace(",", ".")
     m = re.search(r"(\d+(\.\d{1,2})?)", cleaned)
     if not m:
@@ -33,45 +32,68 @@ def parse_price(text: str):
     return float(m.group(1))
 
 
-def fetch_prices(url: str):
+def parse_budgetdranken_product(url: str):
     """
-    Fetch current price and old price from a DrankDozijn product page.
-
-    NOTE: The CSS selectors here may need tweaking if DrankDozijn
-    changes their HTML. If you see 'Could not find price' in the logs,
-    inspect the page HTML and adjust selectors.
+    Fetch current name and (incl. VAT) price / oldPrice from a BudgetDranken product page.
+    Example: https://www.budgetdranken.nl/laphroaig-10yo-single-malt-0-70ltr
     """
-    print(f"Fetching {url}")
+    print(f"[BudgetDranken] Fetching {url}")
     resp = requests.get(url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # Try a few common selectors – adjust if needed
-    # current price
-    price_el = (
-        soup.select_one("[itemprop=price]")
-        or soup.select_one(".price-current")
-        or soup.select_one(".product-price__main")
-        or soup.select_one(".product-price")
+    # --- Title ---
+    # Magento-style: <h1 class="page-title"><span class="base">…</span></h1>
+    title_el = (
+        soup.select_one("h1.page-title span.base")
+        or soup.select_one("h1.page-title")
+        or soup.select_one("h1")
+        or soup.select_one("title")
     )
+    title = title_el.get_text(strip=True) if title_el else None
 
-    # old price (striked through / from-price)
-    old_el = (
-        soup.select_one(".price-old")
-        or soup.select_one(".product-price__old")
-        or soup.select_one(".old-price")
-    )
+    # --- Prices (incl. VAT) ---
+    # On product pages, you typically see lines like:
+    #   € 45,85
+    #   € 40,60
+    #   Koop 6 voor € 39,40 ...
+    #
+    # We only want the first 1–2 base prices (normal + special),
+    # NOT the "Koop 6 voor" multi-bottle prices.
+    text_nodes = soup.find_all(string=re.compile("€"))
+    found_prices = []
 
-    price = parse_price(price_el.get_text(strip=True)) if price_el else None
-    old_price = parse_price(old_el.get_text(strip=True)) if old_el else None
+    for node in text_nodes:
+        txt = node.strip()
+        # Skip obvious multi-bottle discount lines
+        if "Koop" in txt:
+            continue
+        p = parse_price(txt)
+        if p is not None:
+            found_prices.append(p)
+        if len(found_prices) >= 2:
+            break
+
+    price = None
+    old_price = None
+
+    if len(found_prices) == 1:
+        # Only one price → current price, no oldPrice
+        price = found_prices[0]
+    elif len(found_prices) >= 2:
+        # Two prices: assume highest = oldPrice, lowest = current special price
+        high = max(found_prices[0], found_prices[1])
+        low = min(found_prices[0], found_prices[1])
+        old_price = high
+        price = low
 
     if price is None:
-        print(f"  ⚠️  Could not find price on page: {url}")
+        print(f"  ⚠️ Could not parse price for BudgetDranken URL: {url}")
 
-    return price, old_price
+    return title, price, old_price
 
 
-def main():
+def update_offers():
     if not OFFERS_PATH.exists():
         print("offers.json not found")
         sys.exit(1)
@@ -86,24 +108,40 @@ def main():
         if not url:
             continue
 
-        try:
-            price, old_price = fetch_prices(url)
-        except Exception as e:
-            print(f"  ❌ Error fetching {url}: {e}")
+        domain = urlparse(url).netloc.lower()
+
+        # Only handle BudgetDranken entries here
+        if "budgetdranken.nl" in domain:
+            try:
+                title, price, old_price = parse_budgetdranken_product(url)
+            except Exception as e:
+                print(f"  ❌ Error fetching BudgetDranken URL {url}: {e}")
+                continue
+
+            # Update title if site title exists + changed
+            if title and title != offer.get("title"):
+                print(f"  ✅ Title: {offer.get('title')} → {title}")
+                offer["title"] = title
+                changed = True
+
+            # Update price (incl. VAT)
+            if price is not None and price != offer.get("price"):
+                print(f"  ✅ Price: {offer.get('price')} → {price}")
+                offer["price"] = price
+                changed = True
+
+            # Update oldPrice if we detected a discount
+            if old_price is not None and old_price != offer.get("oldPrice"):
+                print(f"  ✅ Old price: {offer.get('oldPrice')} → {old_price}")
+                offer["oldPrice"] = old_price
+                changed = True
+
+        else:
+            # Ignore other stores in this script
             continue
 
-        if price is not None and price != offer.get("price"):
-            print(f"  ✅ Updating price {offer.get('price')} → {price}")
-            offer["price"] = price
-            changed = True
-
-        if old_price is not None and old_price != offer.get("oldPrice"):
-            print(f"  ✅ Updating oldPrice {offer.get('oldPrice')} → {old_price}")
-            offer["oldPrice"] = old_price
-            changed = True
-
     if not changed:
-        print("No price changes detected.")
+        print("No changes detected.")
         return
 
     with OFFERS_PATH.open("w", encoding="utf-8") as f:
@@ -114,4 +152,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    update_offers()
