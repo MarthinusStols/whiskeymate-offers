@@ -42,4 +42,3 @@ jobs:
           git add offers.json
           git commit -m "chore: update DrankDozijn prices"
           git push
-
