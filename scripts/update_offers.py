@@ -1,6 +1,6 @@
 import json
-import re
 import sys
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -36,36 +36,40 @@ def parse_budgetdranken_product(url: str):
     title = title_el.get_text(strip=True) if title_el else None
 
     # ------------------------------
-    # TRUE PRICE (data-price-amount)
+    # FIX: ONLY look inside .product-info-price
+    # This BLOCK contains the REAL whisky price
     # ------------------------------
+    info_block = soup.select_one(".product-info-price")
+    if not info_block:
+        print("  ❌ ERROR: .product-info-price block not found")
+        return title, None, None
+
     price = None
     old_price = None
 
-    price_wrapper = soup.select_one('[data-price-type="finalPrice"]')
-    old_price_wrapper = soup.select_one('[data-price-type="oldPrice"]')
-
-    # Read correct price
-    if price_wrapper and price_wrapper.has_attr("data-price-amount"):
+    # FINAL PRICE (real bottle price)
+    final_el = info_block.select_one('[data-price-type="finalPrice"]')
+    if final_el and final_el.has_attr("data-price-amount"):
         try:
-            price = float(price_wrapper["data-price-amount"])
-        except Exception:
+            price = float(final_el["data-price-amount"])
+        except:
             price = None
 
-    # Read old price only if it exists
-    if old_price_wrapper and old_price_wrapper.has_attr("data-price-amount"):
+    # OLD PRICE (only exists if discounted)
+    old_el = info_block.select_one('[data-price-type="oldPrice"]')
+    if old_el and old_el.has_attr("data-price-amount"):
         try:
-            old_price = float(old_price_wrapper["data-price-amount"])
-        except Exception:
+            old_price = float(old_el["data-price-amount"])
+        except:
             old_price = None
 
-    # Debug logging
     print(f"  ↳ Title: {title}")
     print(f"  ↳ Final price (correct): {price}")
     print(f"  ↳ Old price: {old_price}")
 
-    # Protection: never accept €<5 (shipping/statiegeld)
+    # SAFETY: Reject €1.25 or anything under €5
     if price is not None and price < 5:
-        print("  ❌ Invalid price (<5) — likely shipping/statiegeld. Ignored.")
+        print("  ❌ Detected price < €5 (statiegeld / add-on) — ignoring")
         price = None
 
     return title, price, old_price
@@ -88,32 +92,32 @@ def update_offers():
 
         domain = urlparse(url).netloc.lower()
 
-        # Only process BudgetDranken URLs
+        # Only scrape BudgetDranken
         if "budgetdranken.nl" in domain:
             title, price, old_price = parse_budgetdranken_product(url)
 
-            # Title update
+            # TITLE UPDATE
             if title and title != offer.get("title"):
                 print(f"  ✔ Updating title: {offer['title']} → {title}")
                 offer["title"] = title
                 changed = True
 
-            # Price update
+            # PRICE UPDATE
             if price is not None and price != offer.get("price"):
                 print(f"  ✔ Updating price: {offer.get('price')} → {price}")
                 offer["price"] = price
                 changed = True
 
-            # Old price update
+            # OLD PRICE UPDATE
             if old_price is not None and old_price != offer.get("oldPrice"):
                 print(f"  ✔ Updating oldPrice: {offer.get('oldPrice')} → {old_price}")
                 offer["oldPrice"] = old_price
                 changed = True
 
             if price is None:
-                print("  ❌ WARNING: Could not parse correct price — keeping existing value")
+                print("  ❌ WARNING: Could not parse valid price — kept old value")
 
-    # Save output file if changed
+    # SAVE FILE IF CHANGED
     if changed:
         with OFFERS_PATH.open("w", encoding="utf-8") as f:
             json.dump(offers, f, ensure_ascii=False, indent=2)
