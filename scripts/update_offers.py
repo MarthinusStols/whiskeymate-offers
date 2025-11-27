@@ -30,55 +30,93 @@ def parse_price(text: str):
     return float(m.group(1))
 
 
+def extract_json_ld(soup: BeautifulSoup):
+    """Extract JSON-LD that contains product + offers info."""
+    json_ld_tags = soup.find_all("script", {"type": "application/ld+json"})
+
+    for tag in json_ld_tags:
+        try:
+            data = json.loads(tag.string.strip())
+
+            # Some BD pages return a list of multiple JSON-LD objects
+            if isinstance(data, list):
+                for item in data:
+                    if isinstance(item, dict) and "offers" in item:
+                        return item
+
+            # Single object
+            if isinstance(data, dict) and "offers" in data:
+                return data
+
+        except Exception:
+            continue
+
+    return None
+
+
 def parse_budgetdranken_product(url: str):
     print(f"\n[BudgetDranken] Fetching: {url}")
     resp = requests.get(url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
+
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # --- TITLE ---
+    # --- JSON-LD extraction (MAIN METHOD) ---
+    product_json = extract_json_ld(soup)
+
+    if product_json:
+        title = product_json.get("name", None)
+
+        offers = product_json.get("offers", {})
+        price = None
+        old_price = None
+
+        # Normal price
+        if "price" in offers:
+            try:
+                price = float(offers["price"])
+            except ValueError:
+                pass
+
+        # Discounted items (Magento uses lowPrice / highPrice)
+        if "lowPrice" in offers:
+            price = float(offers["lowPrice"])
+        if "highPrice" in offers:
+            old_price = float(offers["highPrice"])
+
+        print(f"  ↳ JSON-LD title: {title}")
+        print(f"  ↳ JSON-LD price: {price}")
+        print(f"  ↳ JSON-LD oldPrice: {old_price}")
+
+        # JSON-LD is ALWAYS correct for BD → return immediately
+        return title, price, old_price
+
+    print("  ⚠️ JSON-LD missing — falling back to HTML scrapers")
+
+    # ------------------------------------------------------------------
+    # FALLBACK HTML PARSER (only used if JSON-LD fails)
+    # ------------------------------------------------------------------
+
     title_el = (
         soup.select_one("h1.page-title span.base")
         or soup.select_one("h1.page-title")
         or soup.select_one("h1")
     )
     title = title_el.get_text(strip=True) if title_el else None
-    print(f"  ↳ Title found: {title}")
 
-    # --- PRICE (correct Magento selector) ---
     price_el = soup.select_one('[data-price-type="finalPrice"] .price')
     old_price_el = soup.select_one('[data-price-type="oldPrice"] .price')
 
     price = parse_price(price_el.get_text()) if price_el else None
     old_price = parse_price(old_price_el.get_text()) if old_price_el else None
 
-    # Debug logging
-    print(f"  ↳ Raw final price: {price_el.get_text(strip=True) if price_el else 'NONE'}")
-    print(f"  ↳ Raw old price:   {old_price_el.get_text(strip=True) if old_price_el else 'NONE'}")
+    print(f"  ↳ Fallback HTML title: {title}")
+    print(f"  ↳ Fallback HTML final: {price}")
+    print(f"  ↳ Fallback HTML old:   {old_price}")
 
-    # --- FALLBACK 1: Magento fallback class ---
-    if price is None:
-        fallback = soup.select_one('.price-final_price .price')
-        if fallback:
-            price = parse_price(fallback.get_text())
-            print(f"  ↳ Fallback price-final_price: {price}")
-
-    # --- FALLBACK 2: Direct span.price (ONLY if one price exists) ---
-    # This avoids accidental scraping of €1,25 shipping, etc.
-    if price is None:
-        candidates = soup.select("span.price")
-        cleaned = []
-        for c in candidates:
-            value = parse_price(c.get_text())
-            if value and value > 5:  # Ignore shipping like €1.25
-                cleaned.append(value)
-        if len(cleaned) == 1:
-            price = cleaned[0]
-            print(f"  ↳ Fallback: single span.price = {price}")
-
-    # This ensures we NEVER store invalid prices (below €5)
+    # FINAL PROTECTION: never accept price < €5 (shipping, deposits)
     if price is not None and price < 5:
-        print("  ❌ WARNING: Ignoring invalid price under €5 (shipping/packaging)")
+        print("  ❌ Invalid fallback price (<5) blocked")
         price = None
 
     return title, price, old_price
@@ -101,32 +139,31 @@ def update_offers():
 
         domain = urlparse(url).netloc.lower()
 
+        # Only scrape BudgetDranken
         if "budgetdranken.nl" in domain:
             title, price, old_price = parse_budgetdranken_product(url)
 
-            # Update title
+            # -- TITLE --
             if title and title != offer.get("title"):
                 print(f"  ✔ Updating title: {offer['title']} → {title}")
                 offer["title"] = title
                 changed = True
 
-            # Update price (only if valid)
+            # -- PRICE --
             if price is not None and price != offer.get("price"):
                 print(f"  ✔ Updating price: {offer.get('price')} → {price}")
                 offer["price"] = price
                 changed = True
 
-            # Update oldPrice
+            # -- OLD PRICE (discount) --
             if old_price is not None and old_price != offer.get("oldPrice"):
                 print(f"  ✔ Updating oldPrice: {offer.get('oldPrice')} → {old_price}")
                 offer["oldPrice"] = old_price
                 changed = True
 
-            # If price could not be parsed
             if price is None:
-                print("  ❌ Final price could NOT be parsed — leaving existing value untouched")
+                print("  ❌ WARNING: No valid price found — keeping existing value")
 
-    # Write back file
     if changed:
         with OFFERS_PATH.open("w", encoding="utf-8") as f:
             json.dump(offers, f, ensure_ascii=False, indent=2)
