@@ -1,50 +1,49 @@
 [
   {
-    "title": "Laphroaig 10 Years 70cl",
+    "title": "Laphroaig 10YO Single Malt 0,70LTR",
     "store": "BudgetDranken",
-    "price": 0,
-    "oldPrice": null,
+    "price": 40.6,
+    "oldPrice": 45.85,
     "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/laphroaig10-bd.jpg",
     "url": "https://www.budgetdranken.nl/laphroaig-10yo-single-malt-0-70ltr"
   },
   {
-    "title": "Talisker 10 Years 70cl",
+    "title": "Talisker 10 Years Old Single Malt",
     "store": "BudgetDranken",
-    "price": 0,
-    "oldPrice": null,
+    "price": 1.25,
+    "oldPrice": 1.25,
     "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/talisker10-bd.jpg",
     "url": "https://www.budgetdranken.nl/talisker-10-years-old-single-malt"
   },
   {
-    "title": "Ardbeg 10 Years 70cl",
+    "title": "Ardbeg 10 Years Old Single Malt",
     "store": "BudgetDranken",
-    "price": 0,
-    "oldPrice": null,
+    "price": 1.25,
+    "oldPrice": 1.25,
     "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/ardbeg10-bd.jpg",
     "url": "https://www.budgetdranken.nl/ardbeg-10-years-old-single-malt"
   },
   {
-    "title": "Aberlour 12 Years Double Cask 70cl",
+    "title": "Aberlour Single Malt Whisky 12 Years Old Double Cask 0,70LTR",
     "store": "BudgetDranken",
-    "price": 0,
-    "oldPrice": null,
+    "price": 95.0,
+    "oldPrice": 95.0,
     "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/aberlour12-bd.jpg",
     "url": "https://www.budgetdranken.nl/aberlour-single-malt-whisky-12-years-old-double-cask-0-70ltr"
   },
   {
-    "title": "Glenfiddich 12 Years 70cl",
+    "title": "Glenfiddich 12 Years Old Single Malt",
     "store": "BudgetDranken",
-    "price": 0,
-    "oldPrice": null,
+    "price": 1.25,
+    "oldPrice": 1.25,
     "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/glenfiddich12-bd.jpg",
     "url": "https://www.budgetdranken.nl/glenfiddich-12-years-old-single-malt"
   },
- 
   {
-    "title": "Bowmore 12 Years 70cl",
+    "title": "Whiskycadeau Bowmore 12 Years Old Single Malt Whisky in luxe kist",
     "store": "BudgetDranken",
-    "price": 0,
-    "oldPrice": null,
+    "price": 1.25,
+    "oldPrice": 1.25,
     "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/bowmore12-bd.jpg",
     "url": "https://www.budgetdranken.nl/whiskycadeau-bowmore-12-years-old-single-malt-whisky-in-luxe-kist"
   }
