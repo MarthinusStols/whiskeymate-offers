@@ -1,66 +1,51 @@
 [
   {
-    "title": "Laphroaig 10 Year Old",
-    "store": "DrankDozijn",
-    "price": 34.95,
-    "oldPrice": 42.95,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/laphroaig10.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-laphroaig-10-years-single-malt-70cl"
+    "title": "Laphroaig 10 Years 70cl",
+    "store": "BudgetDranken",
+    "price": 0,
+    "oldPrice": null,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/laphroaig10-bd.jpg",
+    "url": "https://www.budgetdranken.nl/laphroaig-10yo-single-malt-0-70ltr"
   },
   {
-    "title": "Talisker 10 Year Old",
-    "store": "DrankDozijn",
-    "price": 37.50,
-    "oldPrice": 45.00,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/talisker10.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-talisker-10-years-single-malt-70cl"
+    "title": "Talisker 10 Years 70cl",
+    "store": "BudgetDranken",
+    "price": 0,
+    "oldPrice": null,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/talisker10-bd.jpg",
+    "url": "https://www.budgetdranken.nl/talisker-10-years-old-single-malt"
   },
   {
-    "title": "Glenlivet 12 Double Oak",
-    "store": "DrankDozijn",
-    "price": 28.95,
-    "oldPrice": 35.95,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/glenlivet12.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-the-glenlivet-12-years-single-malt-70cl"
+    "title": "Ardbeg 10 Years 70cl",
+    "store": "BudgetDranken",
+    "price": 0,
+    "oldPrice": null,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/ardbeg10-bd.jpg",
+    "url": "https://www.budgetdranken.nl/ardbeg-10-years-old-single-malt"
   },
   {
-    "title": "Glenfiddich 15 Solera",
-    "store": "DrankDozijn",
-    "price": 47.95,
-    "oldPrice": 58.95,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/glenfiddich15.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-glenfiddich-15-years-solera-reserva-70cl"
+    "title": "Aberlour 12 Years Double Cask 70cl",
+    "store": "BudgetDranken",
+    "price": 0,
+    "oldPrice": null,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/aberlour12-bd.jpg",
+    "url": "https://www.budgetdranken.nl/aberlour-single-malt-whisky-12-years-old-double-cask-0-70ltr"
   },
   {
-    "title": "Ardbeg 10 Year Old",
-    "store": "DrankDozijn",
-    "price": 46.50,
-    "oldPrice": 59.50,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/ardbeg10.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-ardbeg-10-years-single-malt-70cl"
+    "title": "Glenfiddich 12 Years 70cl",
+    "store": "BudgetDranken",
+    "price": 0,
+    "oldPrice": null,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/glenfiddich12-bd.jpg",
+    "url": "https://www.budgetdranken.nl/glenfiddich-12-years-old-single-malt"
   },
+ 
   {
-    "title": "Aberlour 12 Double Cask",
-    "store": "DrankDozijn",
-    "price": 36.50,
-    "oldPrice": 44.95,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/aberlour12.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-aberlour-12-years-double-cask-matured-70cl"
-  },
-  {
-    "title": "Highland Park 12 Viking Honour",
-    "store": "DrankDozijn",
-    "price": 34.95,
-    "oldPrice": 41.95,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/highlandpark12.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-highland-park-12-years-single-malt-70cl"
-  },
-  {
-    "title": "Redbreast 12",
-    "store": "DrankDozijn",
-    "price": 54.95,
-    "oldPrice": 64.95,
-    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/redbreast12.jpg",
-    "url": "https://www.drankdozijn.nl/artikel/fles-redbreast-12-years-pot-still-70cl"
+    "title": "Bowmore 12 Years 70cl",
+    "store": "BudgetDranken",
+    "price": 0,
+    "oldPrice": null,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/bowmore12-bd.jpg",
+    "url": "https://www.budgetdranken.nl/whiskycadeau-bowmore-12-years-old-single-malt-whisky-in-luxe-kist"
   }
 ]
