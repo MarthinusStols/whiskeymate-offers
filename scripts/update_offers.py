@@ -19,9 +19,7 @@ HEADERS = {
 
 
 def parse_price(text: str):
-    """
-    Convert a price string like '€ 40,60' or '40,60' to float 40.60
-    """
+    """Convert a price string like '€ 52,95' to float 52.95"""
     if not text:
         return None
     cleaned = text.replace("€", "").replace("\xa0", "").strip()
@@ -33,62 +31,55 @@ def parse_price(text: str):
 
 
 def parse_budgetdranken_product(url: str):
-    """
-    Fetch current name and (incl. VAT) price / oldPrice from a BudgetDranken product page.
-    Example: https://www.budgetdranken.nl/laphroaig-10yo-single-malt-0-70ltr
-    """
-    print(f"[BudgetDranken] Fetching {url}")
+    print(f"\n[BudgetDranken] Fetching: {url}")
     resp = requests.get(url, headers=HEADERS, timeout=20)
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # --- Title ---
-    # Magento-style: <h1 class="page-title"><span class="base">…</span></h1>
+    # --- TITLE ---
     title_el = (
         soup.select_one("h1.page-title span.base")
         or soup.select_one("h1.page-title")
         or soup.select_one("h1")
-        or soup.select_one("title")
     )
     title = title_el.get_text(strip=True) if title_el else None
+    print(f"  ↳ Title found: {title}")
 
-    # --- Prices (incl. VAT) ---
-    # On product pages, you typically see lines like:
-    #   € 45,85
-    #   € 40,60
-    #   Koop 6 voor € 39,40 ...
-    #
-    # We only want the first 1–2 base prices (normal + special),
-    # NOT the "Koop 6 voor" multi-bottle prices.
-    text_nodes = soup.find_all(string=re.compile("€"))
-    found_prices = []
+    # --- PRICE (correct Magento selector) ---
+    price_el = soup.select_one('[data-price-type="finalPrice"] .price')
+    old_price_el = soup.select_one('[data-price-type="oldPrice"] .price')
 
-    for node in text_nodes:
-        txt = node.strip()
-        # Skip obvious multi-bottle discount lines
-        if "Koop" in txt:
-            continue
-        p = parse_price(txt)
-        if p is not None:
-            found_prices.append(p)
-        if len(found_prices) >= 2:
-            break
+    price = parse_price(price_el.get_text()) if price_el else None
+    old_price = parse_price(old_price_el.get_text()) if old_price_el else None
 
-    price = None
-    old_price = None
+    # Debug logging
+    print(f"  ↳ Raw final price: {price_el.get_text(strip=True) if price_el else 'NONE'}")
+    print(f"  ↳ Raw old price:   {old_price_el.get_text(strip=True) if old_price_el else 'NONE'}")
 
-    if len(found_prices) == 1:
-        # Only one price → current price, no oldPrice
-        price = found_prices[0]
-    elif len(found_prices) >= 2:
-        # Two prices: assume highest = oldPrice, lowest = current special price
-        high = max(found_prices[0], found_prices[1])
-        low = min(found_prices[0], found_prices[1])
-        old_price = high
-        price = low
-
+    # --- FALLBACK 1: Magento fallback class ---
     if price is None:
-        print(f"  ⚠️ Could not parse price for BudgetDranken URL: {url}")
+        fallback = soup.select_one('.price-final_price .price')
+        if fallback:
+            price = parse_price(fallback.get_text())
+            print(f"  ↳ Fallback price-final_price: {price}")
+
+    # --- FALLBACK 2: Direct span.price (ONLY if one price exists) ---
+    # This avoids accidental scraping of €1,25 shipping, etc.
+    if price is None:
+        candidates = soup.select("span.price")
+        cleaned = []
+        for c in candidates:
+            value = parse_price(c.get_text())
+            if value and value > 5:  # Ignore shipping like €1.25
+                cleaned.append(value)
+        if len(cleaned) == 1:
+            price = cleaned[0]
+            print(f"  ↳ Fallback: single span.price = {price}")
+
+    # This ensures we NEVER store invalid prices (below €5)
+    if price is not None and price < 5:
+        print("  ❌ WARNING: Ignoring invalid price under €5 (shipping/packaging)")
+        price = None
 
     return title, price, old_price
 
@@ -110,45 +101,39 @@ def update_offers():
 
         domain = urlparse(url).netloc.lower()
 
-        # Only handle BudgetDranken entries here
         if "budgetdranken.nl" in domain:
-            try:
-                title, price, old_price = parse_budgetdranken_product(url)
-            except Exception as e:
-                print(f"  ❌ Error fetching BudgetDranken URL {url}: {e}")
-                continue
+            title, price, old_price = parse_budgetdranken_product(url)
 
-            # Update title if site title exists + changed
+            # Update title
             if title and title != offer.get("title"):
-                print(f"  ✅ Title: {offer.get('title')} → {title}")
+                print(f"  ✔ Updating title: {offer['title']} → {title}")
                 offer["title"] = title
                 changed = True
 
-            # Update price (incl. VAT)
+            # Update price (only if valid)
             if price is not None and price != offer.get("price"):
-                print(f"  ✅ Price: {offer.get('price')} → {price}")
+                print(f"  ✔ Updating price: {offer.get('price')} → {price}")
                 offer["price"] = price
                 changed = True
 
-            # Update oldPrice if we detected a discount
+            # Update oldPrice
             if old_price is not None and old_price != offer.get("oldPrice"):
-                print(f"  ✅ Old price: {offer.get('oldPrice')} → {old_price}")
+                print(f"  ✔ Updating oldPrice: {offer.get('oldPrice')} → {old_price}")
                 offer["oldPrice"] = old_price
                 changed = True
 
-        else:
-            # Ignore other stores in this script
-            continue
+            # If price could not be parsed
+            if price is None:
+                print("  ❌ Final price could NOT be parsed — leaving existing value untouched")
 
-    if not changed:
-        print("No changes detected.")
-        return
-
-    with OFFERS_PATH.open("w", encoding="utf-8") as f:
-        json.dump(offers, f, ensure_ascii=False, indent=2)
-        f.write("\n")
-
-    print("offers.json updated.")
+    # Write back file
+    if changed:
+        with OFFERS_PATH.open("w", encoding="utf-8") as f:
+            json.dump(offers, f, ensure_ascii=False, indent=2)
+            f.write("\n")
+        print("\n✔ offers.json updated.")
+    else:
+        print("\nNo changes detected.")
 
 
 if __name__ == "__main__":
