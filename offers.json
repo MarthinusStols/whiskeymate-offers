@@ -1,66 +1,66 @@
 [
   {
-    "title": "Lagavulin 16 Year Old",
-    "store": "The Whisky Exchange",
-    "price": 79.99,
-    "oldPrice": 95.00,
-    "imageURL": "https://images.thewhiskyexchange.com/900/lagob.16yo.jpg",
-    "url": "https://www.thewhiskyexchange.com/p/44/lagavulin-16-year-old"
-  },
-  {
-    "title": "Ardbeg Uigeadail",
-    "store": "Master of Malt",
-    "price": 64.90,
-    "oldPrice": 79.90,
-    "imageURL": "https://cdn3.masterofmalt.com/whiskies/p/ardbeg-uigeadail-whisky.jpg",
-    "url": "https://www.masterofmalt.com/whiskies/ardbeg/ardbeg-uigeadail-whisky/"
-  },
-  {
-    "title": "Aberlour A'Bunadh Batch 76",
-    "store": "The Whisky Exchange",
-    "price": 84.95,
-    "oldPrice": 99.95,
-    "imageURL": "https://images.thewhiskyexchange.com/900/aberl.aob4.jpg",
-    "url": "https://www.thewhiskyexchange.com/p/64018/aberlour-abunadh-batch-76"
-  },
-  {
-    "title": "Glenfiddich 18 Year Old",
-    "store": "Master of Malt",
-    "price": 87.90,
-    "oldPrice": 110.00,
-    "imageURL": "https://cdn3.masterofmalt.com/whiskies/p/glenfiddich-18-whisky.jpg",
-    "url": "https://www.masterofmalt.com/whiskies/glenfiddich/glenfiddich-18-year-old-whisky/"
-  },
-  {
     "title": "Laphroaig 10 Year Old",
-    "store": "The Whisky Exchange",
-    "price": 41.95,
-    "oldPrice": 52.95,
-    "imageURL": "https://images.thewhiskyexchange.com/900/lapob.10yo.jpg",
-    "url": "https://www.thewhiskyexchange.com/p/520/laphroaig-10-year-old"
-  },
-  {
-    "title": "Highland Park 12 Year Old Viking Honour",
-    "store": "Master of Malt",
-    "price": 37.95,
-    "oldPrice": 45.95,
-    "imageURL": "https://cdn3.masterofmalt.com/whiskies/p/highland-park-12-year-old-viking-honour-whisky.jpg",
-    "url": "https://www.masterofmalt.com/whiskies/highland-park/highland-park-12-year-old-viking-honour-whisky/"
-  },
-  {
-    "title": "Macallan Double Cask 12 Year Old",
-    "store": "The Whisky Exchange",
-    "price": 72.95,
-    "oldPrice": 82.95,
-    "imageURL": "https://images.thewhiskyexchange.com/900/macad.12yo.jpg",
-    "url": "https://www.thewhiskyexchange.com/p/35330/macallan-12-year-old-double-cask"
+    "store": "DrankDozijn",
+    "price": 34.95,
+    "oldPrice": 42.95,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/laphroaig10.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/laphroaig-10-years"
   },
   {
     "title": "Talisker 10 Year Old",
-    "store": "The Whisky Exchange",
-    "price": 39.75,
-    "oldPrice": 47.75,
-    "imageURL": "https://images.thewhiskyexchange.com/900/talis.10yo.jpg",
-    "url": "https://www.thewhiskyexchange.com/p/44/talisker-10-year-old"
+    "store": "DrankDozijn",
+    "price": 37.50,
+    "oldPrice": 45.00,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/talisker10.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/talisker-10-years"
+  },
+  {
+    "title": "Glenlivet 12 Double Oak",
+    "store": "DrankDozijn",
+    "price": 28.95,
+    "oldPrice": 35.95,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/glenlivet12.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/glenlivet-12-years"
+  },
+  {
+    "title": "Glenfiddich 15 Solera",
+    "store": "DrankDozijn",
+    "price": 47.95,
+    "oldPrice": 58.95,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/glenfiddich15.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/glenfiddich-15-years"
+  },
+  {
+    "title": "Ardbeg 10 Year Old",
+    "store": "DrankDozijn",
+    "price": 46.50,
+    "oldPrice": 59.50,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/ardbeg10.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/ardbeg-10-years"
+  },
+  {
+    "title": "Aberlour 12 Double Cask",
+    "store": "DrankDozijn",
+    "price": 36.50,
+    "oldPrice": 44.95,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/aberlour12.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/aberlour-12-years"
+  },
+  {
+    "title": "Highland Park 12 Viking Honour",
+    "store": "DrankDozijn",
+    "price": 34.95,
+    "oldPrice": 41.95,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/highlandpark12.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/highland-park-12-years"
+  },
+  {
+    "title": "Redbreast 12",
+    "store": "DrankDozijn",
+    "price": 54.95,
+    "oldPrice": 64.95,
+    "imageURL": "https://marthinusstols.github.io/whiskeymate-offers/images/redbreast12.jpg",
+    "url": "https://www.drankdozijn.nl/artikel/redbreast-12-years"
   }
 ]
