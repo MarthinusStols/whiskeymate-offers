@@ -2,17 +2,22 @@ name: Update whisky offers
 
 on:
   schedule:
-    # Every day at 05:00 UTC
-    - cron: "0 5 * * *"
-  workflow_dispatch:
+    - cron: "0 5 * * *"   # Daily at 05:00 UTC
+  workflow_dispatch:       # Allow manual runs
+
+concurrency:
+  group: price-updater
+  cancel-in-progress: true
 
 jobs:
   update-prices:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # Needed for version bump commits
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -25,18 +30,38 @@ jobs:
           pip install requests beautifulsoup4
 
       - name: Run price updater
-        run: python scripts/update_offers.py
-
-      - name: Commit & push if changed
         run: |
-          if git diff --quiet; then
-            echo "No changes to commit."
-            exit 0
+          echo "Running scraper..."
+          python scripts/update_offers.py
+
+      - name: Bump version if offers.json changed
+        id: version-bump
+        run: |
+          if git diff --quiet offers.json; then
+            echo "No offer changes detected — skipping version bump."
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "Offer changes detected — bumping version."
+            if [ ! -f version.txt ]; then
+              echo "1" > version.txt
+            else
+              VERSION=$(cat version.txt)
+              NEW_VERSION=$((VERSION + 1))
+              echo $NEW_VERSION > version.txt
+            fi
+            echo "changed=true" >> $GITHUB_OUTPUT
           fi
 
+      - name: Commit and push changes
+        if: steps.version-bump.outputs.changed == 'true'
+        run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           git add offers.json version.txt
-          git commit -m "chore: update whisky offers"
+          git commit -m "chore: update whisky offers + version bump"
           git push
+
+      - name: No changes summary
+        if: steps.version-bump.outputs.changed == 'false'
+        run: echo "No updates — workflow finished cleanly."
