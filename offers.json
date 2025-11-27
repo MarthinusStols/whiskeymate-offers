@@ -1,19 +1,66 @@
 [
   {
-    "title": "Lagavulin 16",
+    "title": "Lagavulin 16 Year Old",
     "store": "The Whisky Exchange",
     "price": 79.99,
-    "oldPrice": 95.0,
-    "imageURL": "https://example.com/lagavulin.jpg",
-    "url": "https://shop.com/lagavulin16"
+    "oldPrice": 95.00,
+    "imageURL": "https://images.thewhiskyexchange.com/900/lagob.16yo.jpg",
+    "url": "https://www.thewhiskyexchange.com/p/44/lagavulin-16-year-old"
   },
   {
     "title": "Ardbeg Uigeadail",
     "store": "Master of Malt",
     "price": 64.90,
-    "oldPrice": null,
-    "imageURL": "https://example.com/uigeadail.jpg",
-    "url": "https://shop.com/uigeadail"
+    "oldPrice": 79.90,
+    "imageURL": "https://cdn3.masterofmalt.com/whiskies/p/ardbeg-uigeadail-whisky.jpg",
+    "url": "https://www.masterofmalt.com/whiskies/ardbeg/ardbeg-uigeadail-whisky/"
+  },
+  {
+    "title": "Aberlour A'Bunadh Batch 76",
+    "store": "The Whisky Exchange",
+    "price": 84.95,
+    "oldPrice": 99.95,
+    "imageURL": "https://images.thewhiskyexchange.com/900/aberl.aob4.jpg",
+    "url": "https://www.thewhiskyexchange.com/p/64018/aberlour-abunadh-batch-76"
+  },
+  {
+    "title": "Glenfiddich 18 Year Old",
+    "store": "Master of Malt",
+    "price": 87.90,
+    "oldPrice": 110.00,
+    "imageURL": "https://cdn3.masterofmalt.com/whiskies/p/glenfiddich-18-whisky.jpg",
+    "url": "https://www.masterofmalt.com/whiskies/glenfiddich/glenfiddich-18-year-old-whisky/"
+  },
+  {
+    "title": "Laphroaig 10 Year Old",
+    "store": "The Whisky Exchange",
+    "price": 41.95,
+    "oldPrice": 52.95,
+    "imageURL": "https://images.thewhiskyexchange.com/900/lapob.10yo.jpg",
+    "url": "https://www.thewhiskyexchange.com/p/520/laphroaig-10-year-old"
+  },
+  {
+    "title": "Highland Park 12 Year Old Viking Honour",
+    "store": "Master of Malt",
+    "price": 37.95,
+    "oldPrice": 45.95,
+    "imageURL": "https://cdn3.masterofmalt.com/whiskies/p/highland-park-12-year-old-viking-honour-whisky.jpg",
+    "url": "https://www.masterofmalt.com/whiskies/highland-park/highland-park-12-year-old-viking-honour-whisky/"
+  },
+  {
+    "title": "Macallan Double Cask 12 Year Old",
+    "store": "The Whisky Exchange",
+    "price": 72.95,
+    "oldPrice": 82.95,
+    "imageURL": "https://images.thewhiskyexchange.com/900/macad.12yo.jpg",
+    "url": "https://www.thewhiskyexchange.com/p/35330/macallan-12-year-old-double-cask"
+  },
+  {
+    "title": "Talisker 10 Year Old",
+    "store": "The Whisky Exchange",
+    "price": 39.75,
+    "oldPrice": 47.75,
+    "imageURL": "https://images.thewhiskyexchange.com/900/talis.10yo.jpg",
+    "url": "https://www.thewhiskyexchange.com/p/44/talisker-10-year-old"
   }
 ]
-
