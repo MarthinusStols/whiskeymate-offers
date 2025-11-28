@@ -1,5 +1,6 @@
 import json
 import sys
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -18,15 +19,38 @@ HEADERS = {
 
 
 def parse_price_float(value):
-    """Convert price strings or floats to valid float."""
-    if value is None:
+    """Convert price strings or floats to float."""
+    if not value:
         return None
-
     try:
-        # Already a float-like string (e.g. "52.95")
         return float(value)
     except ValueError:
+        # Handle "58,95"
+        value = value.replace(",", ".")
+        try:
+            return float(value)
+        except ValueError:
+            return None
+
+
+def extract_hyva_old_price(el):
+    """
+    Extract old price from Hyvä style:
+    x-html="hyva.formatPrice(58.95 + getCustomOptionPrice())"
+    """
+    if not el:
         return None
+
+    attr = el.get("x-html")
+    if not attr:
+        return None
+
+    # Extract first float inside the JS expression
+    match = re.search(r"(\d+\.\d+)", attr)
+    if match:
+        return float(match.group(1))
+
+    return None
 
 
 def parse_budgetdranken_product(url: str):
@@ -36,45 +60,54 @@ def parse_budgetdranken_product(url: str):
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # ----------------------------------------
-    # 1. Extract MAIN PRICE via data-product
-    # ----------------------------------------
+    # ------------------------------------------------
+    # MAIN PRICE (server-rendered)
+    # ------------------------------------------------
     data_div = soup.select_one("div[data-product_id]")
-
     if not data_div:
-        print("  ❌ No data-product div found.")
+        print("  ❌ No data-product block found.")
         return None, None, None
 
     title = data_div.get("data-item_name")
     price_raw = data_div.get("data-price")  # always present
 
-    print(f"  ↳ Found data-product block")
-    print(f"     item_name: {title}")
-    print(f"     data-price: {price_raw}")
-
-    # Convert to float
     price = parse_price_float(price_raw)
 
-    # Block €1.25 etc.
+    print(f"  ↳ Title: {title}")
+    print(f"  ↳ data-price: {price_raw} → {price}")
+
     if price is not None and price < 5:
-        print("  ❌ Price < €5 detected, ignoring.")
+        print("  ❌ Price < €5 detected — statiegeld/add-on. Ignored.")
         price = None
 
-    # -----------------------------------------------------
-    # 2. Extract OLD PRICE separately from HTML (important!)
-    # -----------------------------------------------------
+    # ------------------------------------------------
+    # OLD PRICE (Hyvä JS-driven price)
+    # ------------------------------------------------
     old_price = None
 
-    old_el = soup.select_one(".old-price .price")
-    if old_el:
-        old_raw = old_el.get_text(strip=True)
-        old_price = parse_price_float(old_raw)
-        print(f"     OLD PRICE detected from HTML: {old_raw} → {old_price}")
-    else:
-        print("     No old price element found on page.")
+    old_price_el = soup.select_one(".old-price .price")
 
-    print(f"  ↳ Parsed final price: {price}")
-    print(f"  ↳ Parsed old price:   {old_price}")
+    if old_price_el:
+        text_value = old_price_el.get_text(strip=True)
+
+        if text_value:
+            # Sometimes Hyvä fills text, sometimes empty
+            old_price = parse_price_float(text_value)
+            print(f"  ↳ Old price (text): {text_value} → {old_price}")
+        else:
+            # Extract from x-html expression
+            extracted = extract_hyva_old_price(old_price_el)
+            if extracted:
+                old_price = extracted
+                print(f"  ↳ Old price extracted from x-html → {old_price}")
+            else:
+                print("  ↳ Old price present but empty — no x-html value extracted")
+
+    else:
+        print("  ↳ No .old-price element on page")
+
+    print(f"  ↳ Final parsed price: {price}")
+    print(f"  ↳ Final parsed old price: {old_price}")
 
     return title, price, old_price
 
@@ -94,36 +127,29 @@ def update_offers():
         if not url:
             continue
 
-        domain = urlparse(url).netloc.lower()
-
-        # Only handle BudgetDranken links
-        if "budgetdranken.nl" not in domain:
+        if "budgetdranken.nl" not in url.lower():
             continue
 
         title, price, old_price = parse_budgetdranken_product(url)
 
-        # --- UPDATE TITLE ---
+        # TITLE
         if title and title != offer.get("title"):
             print(f"  ✔ Updating title: {offer['title']} → {title}")
             offer["title"] = title
             changed = True
 
-        # --- UPDATE PRICE ---
+        # PRICE
         if price is not None and price != offer.get("price"):
             print(f"  ✔ Updating price: {offer.get('price')} → {price}")
             offer["price"] = price
             changed = True
 
-        # --- UPDATE OLD PRICE ---
+        # OLD PRICE
         if old_price is not None and old_price != offer.get("oldPrice"):
             print(f"  ✔ Updating oldPrice: {offer.get('oldPrice')} → {old_price}")
             offer["oldPrice"] = old_price
             changed = True
 
-        if price is None:
-            print("  ❌ WARNING: No valid price parsed. Keeping existing value.")
-
-    # Save JSON if changed
     if changed:
         with OFFERS_PATH.open("w", encoding="utf-8") as f:
             json.dump(offers, f, ensure_ascii=False, indent=2)
