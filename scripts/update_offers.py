@@ -36,32 +36,42 @@ def parse_budgetdranken_product(url: str):
     resp.raise_for_status()
     soup = BeautifulSoup(resp.text, "html.parser")
 
-    # -----------------------------------------------
-    # Extract the real price from the data-product div
-    # -----------------------------------------------
+    # ----------------------------------------
+    # 1. Extract MAIN PRICE via data-product
+    # ----------------------------------------
     data_div = soup.select_one("div[data-product_id]")
 
     if not data_div:
-        print("  ❌ No data-product div found. Cannot extract price.")
+        print("  ❌ No data-product div found.")
         return None, None, None
 
     title = data_div.get("data-item_name")
-    price_raw = data_div.get("data-price")
-    old_price_raw = data_div.get("data-old_price")  # Only exists for discounted items
+    price_raw = data_div.get("data-price")  # always present
 
     print(f"  ↳ Found data-product block")
     print(f"     item_name: {title}")
     print(f"     data-price: {price_raw}")
-    print(f"     data-old_price: {old_price_raw}")
 
     # Convert to float
     price = parse_price_float(price_raw)
-    old_price = parse_price_float(old_price_raw)
 
-    # SAFETY: never accept €1.25 / €1.50 / < €5
+    # Block €1.25 etc.
     if price is not None and price < 5:
-        print("  ❌ Price < €5 detected (statiegeld/add-on) — ignoring it.")
+        print("  ❌ Price < €5 detected, ignoring.")
         price = None
+
+    # -----------------------------------------------------
+    # 2. Extract OLD PRICE separately from HTML (important!)
+    # -----------------------------------------------------
+    old_price = None
+
+    old_el = soup.select_one(".old-price .price")
+    if old_el:
+        old_raw = old_el.get_text(strip=True)
+        old_price = parse_price_float(old_raw)
+        print(f"     OLD PRICE detected from HTML: {old_raw} → {old_price}")
+    else:
+        print("     No old price element found on page.")
 
     print(f"  ↳ Parsed final price: {price}")
     print(f"  ↳ Parsed old price:   {old_price}")
